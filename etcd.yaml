@@ -1,0 +1,36 @@
+- name: Deploy etcd Cluster
+  hosts: etcd
+  become: true
+
+  vars:
+    version: 3.5.8
+    bin_directory: /opt/etcd/bin
+    user: etcd
+    
+
+  tasks:
+    - name: Create etcd Group
+      ansible.builtin.group:
+        name: '{{ user }}'
+
+    - name: Create etcd User
+      ansible.builtin.user: 
+        name: '{{ user }}'
+        group: '{{ user }}'
+
+    - name: "Create directory for etcd binaries"
+      ansible.builtin.file:
+        path: {{ bin_directory }}
+        state: directory
+        owner: etcd
+        group: etcd
+        mode: 0700
+
+    - name: Download the tarball into the tmp directory
+      ansible.builtin.get_url:
+        url: https://storage.googleapis.com/etcd/v{{ version }}/etcd-v{{ version }}-linux-amd64.tar.gz
+        dest: /tmp/etcd.tar.gz
+        owner: root
+        group: root
+        mode: 0600
+        force: True

@@ -1,0 +1,13 @@
+name: {{ inventory_hostname }}-server
+data-dir: /var/lib/etcd_data_dir
+wal-dir: /var/lib/etcd_wal_dir
+initial-advertise-peer-urls: http://{{ host }}:2380
+listen-peer-urls: http://{{ host }}:2380,http://127.0.0.1:2379
+advertise-client-urls: http://{{ host }}:2379
+listen-client-urls: http://{{ host }}:2379,http://127.0.0.1:2379
+initial-cluster-token: etcd-cluster
+initial-cluster-state: new
+initial-cluster:
+{% for host in groups['etcd_servers'] %}
+  {{ host }}=http://{{ host }}:2380{% if not loop.last %},{% endif %}
+{% endfor %}
