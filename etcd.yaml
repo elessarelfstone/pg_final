@@ -20,17 +20,17 @@
 
     - name: "Create directory for etcd binaries"
       ansible.builtin.file:
-        path: {{ bin_directory }}
+        path: '{{ bin_directory }}'
         state: directory
-        owner: etcd
-        group: etcd
+        owner: '{{ user }}'
+        group: '{{ user }}'
         mode: 0700
 
     - name: Download the tarball into the tmp directory
       ansible.builtin.get_url:
         url: https://storage.googleapis.com/etcd/v{{ version }}/etcd-v{{ version }}-linux-amd64.tar.gz
         dest: /tmp/etcd.tar.gz
-        owner: root
-        group: root
+        owner: '{{ user }}'
+        group: '{{ user }}'
         mode: 0600
         force: True
