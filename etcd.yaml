@@ -5,9 +5,10 @@
   vars:
     version: 3.5.8
     bin_directory: /opt/etcd/bin
+    etc_directory: /etc/etcd
     user: etcd
     
-
+  
   tasks:
     - name: Create etcd Group
       ansible.builtin.group:
@@ -63,6 +64,15 @@
         group: '{{ user }}'
         mode: 0700
     
+    - name: Get etcd version
+      shell: '{{ bin_directory }}/etcd --version'
+      register: etcd_version
+      become: yes
+    
+    - name: Print etcd version
+      debug: 
+        msg: "{{ etcd_version }}"
+    
     - name: "Add /opt/etcd/bin/ to the $PATH environment variable"
       lineinfile:
         path: /etc/profile
@@ -71,10 +81,40 @@
         create: True
         insertafter: EOF
     
-    # - name: "Set the ETCDCTL_API environment variable to 3"
-    #   lineinfile:
-    #     path: /etc/profile
-    #     line: export ETCDCTL_API=3
-    #     state: present
-    #     create: True
-    #     insertafter: EOF
+    - name: "Set the ETCDCTL_API environment variable to 3"
+      lineinfile:
+        path: /etc/profile
+        line: export ETCDCTL_API=3
+        state: present
+        create: True
+        insertafter: EOF
+    
+    - name: "Create directory for etcd configure"
+      file:
+        path: '{{ etc_directory }}'
+        state: directory
+        owner: '{{ user }}'
+        group: '{{ user }}'
+        mode: 0700
+
+    - name: Create etcd config
+      template: 
+        src: etcd.yml.j2
+        dest: "{{ etc_directory }}/etcd.yml"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: '0644'
+
+    - name: Create etcd service
+      template: 
+        src: etcd.service.j2
+        dest: "/etc/systemd/system/etcd.service"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: '0644'
+    
+    - name: Запустить сервис httpd
+      systemd:
+        name: etcd
+        state: restarted
+      become: yes
