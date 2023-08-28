@@ -1,20 +1,17 @@
-name: {{ inventory_hostname }}-server
-data-dir: /var/lib/etcd_data_dir
-wal-dir: /var/lib/etcd_wal_dir
+name: '{{ inventory_hostname }}'
+data-dir: '{{ data_directory }}'
+wal-dir: '{{ wal_directory }}'
 snapshot-count: 10000
 heartbeat-interval: 100
 election-timeout: 1000
 quota-backend-bytes: 0
 initial-advertise-peer-urls: http://{{ ansible_host}}:2380
-listen-peer-urls: http://{{ ansible_host }}:2380,http://127.0.0.1:2379
+listen-peer-urls: http://{{ ansible_host }}:2380, http://localhost:2380
 advertise-client-urls: http://{{ ansible_host }}:2379
-listen-client-urls: http://{{ ansible_host }}:2379,http://127.0.0.1:2379
-initial-cluster-token: etcd-cluster
-initial-cluster-state: new
-initial-cluster:
-{% for host in groups['etcd'] %}
-  {{ host }}=http://{{ hostvars[host]['ansible_host'] }}:2380{% if not loop.last %},{% endif %}
-{% endfor %}
+listen-client-urls: http://{{ ansible_host }}:2379, http://localhost:2379
+initial-cluster-token: 'etcd-cluster'
+initial-cluster-state: 'new'
+initial-cluster: '{% for host in groups['etcd'] %}{{ host }}=http://{{ hostvars[host]['ansible_host'] }}:2380{% if not loop.last %}, {% endif %}{% endfor %}'
 max-snapshots: 5
 max-wals: 5
 cors:
@@ -52,4 +49,3 @@ log-outputs: [stderr]
 force-new-cluster: false
 auto-compaction-mode: periodic
 auto-compaction-retention: "1"
-
