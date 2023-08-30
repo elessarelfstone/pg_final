@@ -36,7 +36,6 @@
 
 
 
-
     - name: Download the tarball into the tmp directory
       ansible.builtin.get_url:
         url: https://storage.googleapis.com/etcd/v{{ version }}/etcd-v{{ version }}-linux-amd64.tar.gz
