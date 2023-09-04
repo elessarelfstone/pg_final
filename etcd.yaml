@@ -46,7 +46,7 @@
         force: True
 
     - name: "Extract the contents of the tarball"
-      unarchive:
+      ansible.builtin.unarchive:
         src: /tmp/etcd.tar.gz
         dest: '{{ bin_directory }}'
         owner: '{{ user }}'
@@ -58,7 +58,7 @@
         remote_src: True
     
     - name: "Set permissions for etcd"
-      file:
+      ansible.builtin.file:
         path: '{{ bin_directory }}/etcd'
         state: file
         owner: '{{ user }}'
@@ -66,7 +66,7 @@
         mode: 0774
 
     - name: "Set permissions for etcdctl"
-      file:
+      ansible.builtin.file:
         path: '{{ bin_directory }}/etcdctl'
         state: file
         owner: '{{ user }}'
@@ -74,16 +74,16 @@
         mode: 0774
     
     - name: Get etcd version
-      shell: '{{ bin_directory }}/etcd --version'
+      ansible.builtin.shell: '{{ bin_directory }}/etcd --version'
       register: etcd_version
       become: yes
     
     - name: Print etcd version
-      debug: 
+      ansible.builtin.debug: 
         msg: "{{ etcd_version }}"
     
     - name: "Add /opt/etcd/bin/ to the $PATH environment variable"
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/profile
         line: export PATH="$PATH:/opt/etcd/bin"
         state: present
@@ -91,7 +91,7 @@
         insertafter: EOF
     
     - name: "Set the ETCDCTL_API environment variable to 3"
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/profile
         line: export ETCDCTL_API=3
         state: present
@@ -99,7 +99,7 @@
         insertafter: EOF
     
     - name: "Create directory for etcd configure"
-      file:
+      ansible.builtin.file:
         path: '{{ etc_directory }}'
         state: directory
         owner: '{{ user }}'
@@ -107,7 +107,7 @@
         mode: 0775
 
     - name: Create etcd config
-      template: 
+      ansible.builtin.template: 
         src: etcd.yml.j2
         dest: "{{ etc_directory }}/etcd.yml"
         owner: "{{ user }}"
@@ -115,7 +115,7 @@
         mode: 0775
 
     - name: Create etcd service
-      template: 
+      ansible.builtin.template: 
         src: etcd.service.j2
         dest: "/etc/systemd/system/etcd.service"
         owner: "{{ user }}"
@@ -123,17 +123,17 @@
         mode: 0775
     
     - name: Start etcd service
-      systemd:
+      ansible.builtin.systemd:
         name: etcd
         state: restarted
       become: yes
 
 
     - name: Fetch service logs
-      command:
+      ansible.builtin.command:
         cmd: journalctl -u etcd.service --no-pager
       register: journal_output
 
     - name: Show journal output
-      debug:
+      ansible.builtin.debug:
         var: journal_output.stdout_lines
